@@ -2,9 +2,9 @@
 -- Step 1: Database schema + seed data
 -- MySQL 8.x
 
-DROP DATABASE IF EXISTS helpdesk_db;
-CREATE DATABASE helpdesk_db;
-USE helpdesk_db;
+DROP DATABASE IF EXISTS hsta_db;
+CREATE DATABASE hsta_db;
+USE hsta_db;
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -159,11 +159,11 @@ INSERT INTO `KNOWLEDGE_BASE` (title, content, category, created_by) VALUES
     3
 );
 
--- use helpdesk_db;
+-- use hsta_db;
 -- show tables;
 -- select email,role from `USER`;
 
--- use helpdesk_db;
+-- use hsta_db;
 -- select user_id, name, email, role, created_at, password 
 -- from `USER`
 -- order by user_id desc;
