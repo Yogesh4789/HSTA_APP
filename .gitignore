@@ -1,0 +1,26 @@
+# Secrets and environment files
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.jks
+
+# Build outputs
+build/
+target/
+out/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# OS/editor artifacts
+.DS_Store
+Thumbs.db
+
+# Eclipse project metadata (keep local only)
+.classpath
+.project
+.settings/
