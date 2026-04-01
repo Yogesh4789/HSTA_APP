@@ -14,12 +14,14 @@ public class MailService {
 
     private final String username;
     private final String password;
+    private final String fromAddress;
     private final Properties props;
 
     public MailService() {
         // Read credentials from environment variables for Render deployment
         this.username = System.getenv("SMTP_USER");
         this.password = System.getenv("SMTP_PASS");
+        this.fromAddress = System.getenv("SMTP_FROM");
 
         props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -27,6 +29,10 @@ public class MailService {
         // Default to Gmail if not specified, can be externalized as well
         props.put("mail.smtp.host", System.getenv("SMTP_HOST") != null ? System.getenv("SMTP_HOST") : "smtp.gmail.com");
         props.put("mail.smtp.port", System.getenv("SMTP_PORT") != null ? System.getenv("SMTP_PORT") : "587");
+        String timeoutMs = System.getenv("SMTP_TIMEOUT_MS") != null ? System.getenv("SMTP_TIMEOUT_MS") : "10000";
+        props.put("mail.smtp.connectiontimeout", timeoutMs);
+        props.put("mail.smtp.timeout", timeoutMs);
+        props.put("mail.smtp.writetimeout", timeoutMs);
     }
 
     public boolean sendVerificationEmail(String toEmail, String token, String requestUrl) {
@@ -46,7 +52,7 @@ public class MailService {
 
         try {
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(username));
+            message.setFrom(new InternetAddress(resolveFromAddress()));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
             message.setSubject("HSTA - Account Verification required");
             
@@ -86,7 +92,7 @@ public class MailService {
 
         try {
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(username));
+            message.setFrom(new InternetAddress(resolveFromAddress()));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
             message.setSubject("HSTA - Password reset request");
 
@@ -108,5 +114,12 @@ public class MailService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private String resolveFromAddress() {
+        if (fromAddress != null && !fromAddress.trim().isEmpty()) {
+            return fromAddress.trim();
+        }
+        return username;
     }
 }

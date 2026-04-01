@@ -50,8 +50,11 @@ public class UserService {
         
         if (isPendingRegistered) {
             // Send verification email
-            mailService.sendVerificationEmail(email.trim(), token, requestUrl);
-            return true;
+            boolean sent = mailService.sendVerificationEmail(email.trim(), token, requestUrl);
+            if (sent) {
+                return true;
+            }
+            userDAO.deleteUnverifiedUserByEmail(email.trim());
         }
         
         return false;

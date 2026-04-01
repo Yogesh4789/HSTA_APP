@@ -263,34 +263,35 @@ th {
 }
 
 .auth-helper-row {
-    margin-top: 22px;
+    margin-top: 8px;
     margin-bottom: 2px;
-    display: flex;
-    justify-content: flex-end;
+    display: block !important;
+    width: 100%;
+    text-align: left !important;
 }
 
-.auth-link-btn {
+.auth-link-text {
     display: inline-block;
-    padding: 7px 12px;
-    border-radius: 8px;
-    border: 1px solid #cfe7e2;
-    background: #eefbf8;
+    margin-left: 0 !important;
+    float: none !important;
     color: #0f766e;
     font-size: 13px;
     font-weight: 700;
     text-decoration: none;
 }
 
-.auth-link-btn:hover {
-    background: #dff5f1;
-    color: #115e59;
-    box-shadow: 0 8px 20px rgba(15, 118, 110, 0.18);
-    transform: translateY(-1px);
+.auth-link-text:visited {
+    color: #0f766e;
 }
 
-.auth-link-btn:focus {
+.auth-link-text:hover {
+    color: #115e59;
+    text-decoration: underline;
+}
+
+.auth-link-text:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.25);
+    text-decoration: underline;
 }
 
 .actions-inline form {

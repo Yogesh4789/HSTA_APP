@@ -16,6 +16,8 @@ Recommended:
 
 - `SMTP_HOST` (default: `smtp.gmail.com`)
 - `SMTP_PORT` (default: `587`)
+- `SMTP_FROM` (recommended for SendGrid verified sender)
+- `SMTP_TIMEOUT_MS` (default: `10000`)
 - `HELPDESK_PUBLIC_BASE_URL` (important for verification/reset email links)
 
 Use `.env.example` as the template.

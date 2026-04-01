@@ -163,7 +163,7 @@ public class UserDAO {
         List<UserBean> users = new ArrayList<UserBean>();
 
         String sql = "SELECT user_id, name, email, password, role, created_at "
-                + "FROM `USER` WHERE password != '*' ORDER BY user_id";
+                + "FROM `USER` WHERE password != '*' AND is_verified = 1 ORDER BY user_id";
 
         try {
             connection = DBConnection.getConnection();
@@ -361,6 +361,27 @@ public class UserDAO {
             isDeleted = preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            closeQuietly(preparedStatement);
+            closeQuietly(connection);
+        }
+        return isDeleted;
+    }
+
+    public boolean deleteUnverifiedUserByEmail(String email) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        boolean isDeleted = false;
+
+        String sql = "DELETE FROM `USER` WHERE email = ? AND is_verified = 0 AND password != '*'";
+
+        try {
+            connection = DBConnection.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, email);
+            isDeleted = preparedStatement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error while rolling back unverified user.", e);
         } finally {
             closeQuietly(preparedStatement);
             closeQuietly(connection);
