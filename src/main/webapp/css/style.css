@@ -294,6 +294,65 @@ th {
     text-decoration: underline;
 }
 
+.password-field-wrap {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.password-field-wrap input[type="password"],
+.password-field-wrap input[type="text"] {
+    padding-right: 42px;
+    margin-bottom: 0;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: #475569;
+    border-radius: 6px;
+    padding: 0;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    min-width: auto;
+    margin: 0;
+    width: 24px;
+    height: 24px;
+}
+
+.password-toggle-btn::after {
+    content: "";
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 50%;
+    height: 2px;
+    background: #475569;
+    transform: rotate(-30deg);
+    transform-origin: center;
+    opacity: 1;
+}
+
+.password-toggle-btn:hover {
+    color: #1f2937;
+}
+
+.password-toggle-btn.is-visible {
+    color: #1f2937;
+}
+
+.password-toggle-btn.is-visible::after {
+    opacity: 0;
+}
+
+.btn-gap-top {
+    margin-top: 12px;
+}
+
 .actions-inline form {
     display: inline-block;
     margin-right: 6px;

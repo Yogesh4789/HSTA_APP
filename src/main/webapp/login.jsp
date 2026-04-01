@@ -83,14 +83,22 @@ boolean rememberChecked = Boolean.TRUE.equals(request.getAttribute("rememberChec
                     <input type="email" name="email" required>
 
                     <label>Password</label>
-                    <input type="password" id="registerPassword" name="password" required minlength="8" maxlength="16"
-                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
-                        title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
+                    <div class="password-field-wrap">
+                        <input type="password" id="registerPassword" name="password" required minlength="8" maxlength="16"
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
+                            title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
+                        <button type="button" class="password-toggle-btn" data-target="registerPassword"
+                            aria-label="Show password" title="Show password">&#128065;</button>
+                    </div>
 
                     <label>Confirm Password</label>
-                    <input type="password" id="registerConfirmPassword" name="confirmPassword" required minlength="8" maxlength="16"
-                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
-                        title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
+                    <div class="password-field-wrap">
+                        <input type="password" id="registerConfirmPassword" name="confirmPassword" required minlength="8" maxlength="16"
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
+                            title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
+                        <button type="button" class="password-toggle-btn" data-target="registerConfirmPassword"
+                            aria-label="Show password" title="Show password">&#128065;</button>
+                    </div>
                     <div class="small" style="margin-bottom: 10px;">Password must be 8-16 chars and include uppercase, lowercase, number, and special character (no spaces).</div>
 
                     <button class="btn btn-secondary" type="submit">Create Account</button>
@@ -109,6 +117,7 @@ boolean rememberChecked = Boolean.TRUE.equals(request.getAttribute("rememberChec
             var loginToggleBtn = document.getElementById("loginToggleBtn");
             var registerPasswordInput = document.getElementById("registerPassword");
             var registerConfirmPasswordInput = document.getElementById("registerConfirmPassword");
+            var registerToggleButtons = document.querySelectorAll("#registerView .password-toggle-btn");
             var passwordPolicyMessage = "Invalid password. Use 8-16 chars with uppercase, lowercase, number, and special character (no spaces).";
 
             function showRegisterView() {
@@ -182,6 +191,26 @@ boolean rememberChecked = Boolean.TRUE.equals(request.getAttribute("rememberChec
                     }
                 });
             }
+
+            registerToggleButtons.forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var targetId = btn.getAttribute("data-target");
+                    var input = document.getElementById(targetId);
+                    if (!input) return;
+                    if (input.type === "password") {
+                        input.type = "text";
+                        btn.classList.add("is-visible");
+                        btn.setAttribute("aria-label", "Hide password");
+                        btn.setAttribute("title", "Hide password");
+                    } else {
+                        input.type = "password";
+                        btn.classList.remove("is-visible");
+                        btn.setAttribute("aria-label", "Show password");
+                        btn.setAttribute("title", "Show password");
+                    }
+                    input.focus();
+                });
+            });
         })();
     </script>
     <script>

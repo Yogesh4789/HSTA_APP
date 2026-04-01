@@ -45,20 +45,52 @@ String tokenEscaped = token.replace("&", "&amp;")
                     <input type="hidden" name="token" value="<%=tokenEscaped%>">
 
                     <label>New Password</label>
-                    <input type="password" name="newPassword" required minlength="8" maxlength="16"
-                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
-                        title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
+                    <div class="password-field-wrap">
+                        <input type="password" id="newPassword" name="newPassword" required minlength="8" maxlength="16"
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
+                            title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
+                        <button type="button" class="password-toggle-btn" data-target="newPassword"
+                            aria-label="Show password" title="Show password">&#128065;</button>
+                    </div>
 
                     <label>Confirm New Password</label>
-                    <input type="password" name="confirmPassword" required minlength="8" maxlength="16"
-                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
-                        title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
+                    <div class="password-field-wrap">
+                        <input type="password" id="confirmNewPassword" name="confirmPassword" required minlength="8" maxlength="16"
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
+                            title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
+                        <button type="button" class="password-toggle-btn" data-target="confirmNewPassword"
+                            aria-label="Show password" title="Show password">&#128065;</button>
+                    </div>
                     <div class="small">Password must be 8-16 chars and include uppercase, lowercase, number, and special character (no spaces).</div>
 
-                    <button class="btn btn-primary" type="submit">Update Password</button>
+                    <button class="btn btn-primary btn-gap-top" type="submit">Update Password</button>
                 </form>
             <% } %>
         </div>
     </div>
+    <script>
+        (function () {
+            var toggleButtons = document.querySelectorAll(".password-toggle-btn");
+            toggleButtons.forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var targetId = btn.getAttribute("data-target");
+                    var input = document.getElementById(targetId);
+                    if (!input) return;
+                    if (input.type === "password") {
+                        input.type = "text";
+                        btn.classList.add("is-visible");
+                        btn.setAttribute("aria-label", "Hide password");
+                        btn.setAttribute("title", "Hide password");
+                    } else {
+                        input.type = "password";
+                        btn.classList.remove("is-visible");
+                        btn.setAttribute("aria-label", "Show password");
+                        btn.setAttribute("title", "Show password");
+                    }
+                    input.focus();
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
