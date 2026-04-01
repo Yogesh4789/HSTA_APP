@@ -13,6 +13,10 @@ public class UserService {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9])\\S{8,16}$");
+    private static final String PASSWORD_POLICY_MESSAGE =
+            "Password must be 8-16 characters and include uppercase, lowercase, number, and special character without spaces.";
 
     private final UserDAO userDAO;
 
@@ -35,6 +39,9 @@ public class UserService {
             return false;
         }
         if (!isValidEmail(email.trim())) {
+            return false;
+        }
+        if (!isStrongPassword(password.trim())) {
             return false;
         }
 
@@ -88,6 +95,9 @@ public class UserService {
         if (!newPassword.equals(confirmPassword)) {
             return false;
         }
+        if (!isStrongPassword(newPassword.trim())) {
+            return false;
+        }
         return userDAO.resetPasswordByToken(token.trim(), newPassword.trim());
     }
 
@@ -133,6 +143,14 @@ public class UserService {
 
     public boolean isValidEmail(String email) {
         return email != null && EMAIL_PATTERN.matcher(email.trim()).matches();
+    }
+
+    public boolean isStrongPassword(String password) {
+        return password != null && PASSWORD_PATTERN.matcher(password.trim()).matches();
+    }
+
+    public String getPasswordPolicyMessage() {
+        return PASSWORD_POLICY_MESSAGE;
     }
 
     private boolean isBlank(String value) {

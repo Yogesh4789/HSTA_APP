@@ -83,10 +83,15 @@ boolean rememberChecked = Boolean.TRUE.equals(request.getAttribute("rememberChec
                     <input type="email" name="email" required>
 
                     <label>Password</label>
-                    <input type="password" name="password" required>
+                    <input type="password" id="registerPassword" name="password" required minlength="8" maxlength="16"
+                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
+                        title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
 
                     <label>Confirm Password</label>
-                    <input type="password" name="confirmPassword" required>
+                    <input type="password" id="registerConfirmPassword" name="confirmPassword" required minlength="8" maxlength="16"
+                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
+                        title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
+                    <div class="small" style="margin-bottom: 10px;">Password must be 8-16 chars and include uppercase, lowercase, number, and special character (no spaces).</div>
 
                     <button class="btn btn-secondary" type="submit">Create Account</button>
                 </form>
@@ -102,6 +107,9 @@ boolean rememberChecked = Boolean.TRUE.equals(request.getAttribute("rememberChec
             var registerView = document.getElementById("registerView");
             var toggleBtn = document.getElementById("registerToggleBtn");
             var loginToggleBtn = document.getElementById("loginToggleBtn");
+            var registerPasswordInput = document.getElementById("registerPassword");
+            var registerConfirmPasswordInput = document.getElementById("registerConfirmPassword");
+            var passwordPolicyMessage = "Invalid password. Use 8-16 chars with uppercase, lowercase, number, and special character (no spaces).";
 
             function showRegisterView() {
                 if (loginView) loginView.style.display = "none";
@@ -139,6 +147,38 @@ boolean rememberChecked = Boolean.TRUE.equals(request.getAttribute("rememberChec
                         history.replaceState(null, "", "<%=request.getContextPath()%>/login.jsp");
                     } else {
                         window.location.hash = "";
+                    }
+                });
+            }
+
+            function passwordIsValid() {
+                return registerPasswordInput && registerPasswordInput.checkValidity();
+            }
+
+            if (registerPasswordInput) {
+                registerPasswordInput.addEventListener("input", function () {
+                    registerPasswordInput.setCustomValidity("");
+                });
+
+                registerPasswordInput.addEventListener("invalid", function () {
+                    registerPasswordInput.setCustomValidity(passwordPolicyMessage);
+                });
+
+                registerPasswordInput.addEventListener("keydown", function (event) {
+                    if (event.key === "Tab" && !passwordIsValid()) {
+                        event.preventDefault();
+                        registerPasswordInput.setCustomValidity(passwordPolicyMessage);
+                        registerPasswordInput.reportValidity();
+                    }
+                });
+            }
+
+            if (registerConfirmPasswordInput) {
+                registerConfirmPasswordInput.addEventListener("focus", function () {
+                    if (!passwordIsValid()) {
+                        registerPasswordInput.setCustomValidity(passwordPolicyMessage);
+                        registerPasswordInput.reportValidity();
+                        registerPasswordInput.focus();
                     }
                 });
             }

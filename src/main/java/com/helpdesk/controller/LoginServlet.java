@@ -133,6 +133,12 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
+        if (!userService.isStrongPassword(password.trim())) {
+            request.setAttribute("errorMessage", userService.getPasswordPolicyMessage());
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        }
+
         if (!userService.isValidEmail(email.trim())) {
             request.setAttribute("errorMessage", "Please enter a valid email address.");
             request.getRequestDispatcher("login.jsp").forward(request, response);
@@ -200,6 +206,13 @@ public class LoginServlet extends HttpServlet {
 
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("errorMessage", "Password and confirm password do not match.");
+            request.setAttribute("token", token);
+            request.getRequestDispatcher("resetPassword.jsp").forward(request, response);
+            return;
+        }
+
+        if (!userService.isStrongPassword(newPassword.trim())) {
+            request.setAttribute("errorMessage", userService.getPasswordPolicyMessage());
             request.setAttribute("token", token);
             request.getRequestDispatcher("resetPassword.jsp").forward(request, response);
             return;

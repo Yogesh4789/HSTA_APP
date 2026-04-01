@@ -45,10 +45,15 @@ String tokenEscaped = token.replace("&", "&amp;")
                     <input type="hidden" name="token" value="<%=tokenEscaped%>">
 
                     <label>New Password</label>
-                    <input type="password" name="newPassword" required>
+                    <input type="password" name="newPassword" required minlength="8" maxlength="16"
+                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
+                        title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
 
                     <label>Confirm New Password</label>
-                    <input type="password" name="confirmPassword" required>
+                    <input type="password" name="confirmPassword" required minlength="8" maxlength="16"
+                        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])\S{8,16}$"
+                        title="8-16 chars with uppercase, lowercase, number, and special character. No spaces.">
+                    <div class="small">Password must be 8-16 chars and include uppercase, lowercase, number, and special character (no spaces).</div>
 
                     <button class="btn btn-primary" type="submit">Update Password</button>
                 </form>
