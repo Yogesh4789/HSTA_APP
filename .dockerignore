@@ -1,0 +1,12 @@
+.git
+.settings
+build
+target
+out
+sql
+src
+*.log
+*.tmp
+.classpath
+.project
+README.md

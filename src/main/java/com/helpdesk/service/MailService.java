@@ -69,4 +69,44 @@ public class MailService {
             return false;
         }
     }
+
+    public boolean sendPasswordResetEmail(String toEmail, String token, String requestUrl) {
+        if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
+            System.err.println("SMTP credentials are not configured. Cannot send password reset email to " + toEmail);
+            System.out.println("PASSWORD RESET LINK: " + requestUrl + "?token=" + token);
+            return false;
+        }
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(username, password);
+            }
+        });
+
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(username));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+            message.setSubject("HSTA - Password reset request");
+
+            String resetLink = requestUrl + "?token=" + token;
+
+            String htmlContent = "<h3>Password Reset Requested</h3>" +
+                    "<p>We received a request to reset your account password.</p>" +
+                    "<p>Click the link below to set a new password. <b>This link will expire in 10 minutes.</b></p>" +
+                    "<p><a href=\"" + resetLink + "\">" + resetLink + "</a></p>" +
+                    "<br><p>If you did not request this, you can safely ignore this email.</p>";
+
+            message.setContent(htmlContent, "text/html; charset=utf-8");
+
+            Transport.send(message);
+            System.out.println("Password reset email successfully sent to " + toEmail);
+            return true;
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

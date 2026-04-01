@@ -18,7 +18,7 @@ public class UserDAO {
         UserBean user = null;
 
         String sql = "SELECT user_id, name, email, password, role, created_at "
-                + "FROM `USER` WHERE email = ? AND password = ? AND password != '*'";
+                + "FROM `USER` WHERE email = ? AND password = ? AND password != '*' AND is_verified = 1";
 
         try {
             connection = DBConnection.getConnection();
@@ -212,7 +212,9 @@ public class UserDAO {
         PreparedStatement preparedStatement = null;
         boolean isDeleted = false;
 
-        String sql = "UPDATE `USER` SET password = '*', email = CONCAT('deleted_', user_id, '_', SUBSTRING(email, 1, 70)) WHERE user_id = ?";
+        String sql = "UPDATE `USER` SET password = '*', email = CONCAT('deleted_', user_id, '_', SUBSTRING(email, 1, 70)), "
+                + "reset_token = NULL, reset_expiry = NULL, verification_token = NULL, verification_expiry = NULL "
+                + "WHERE user_id = ?";
 
         try {
             connection = DBConnection.getConnection();
@@ -229,12 +231,62 @@ public class UserDAO {
         return isDeleted;
     }
 
+    public boolean createPasswordResetToken(String email, String token, int expiryMinutes) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        boolean isUpdated = false;
+
+        String sql = "UPDATE `USER` SET reset_token = ?, reset_expiry = DATE_ADD(NOW(), INTERVAL ? MINUTE) "
+                + "WHERE email = ? AND is_verified = 1 AND password != '*'";
+
+        try {
+            connection = DBConnection.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, token);
+            preparedStatement.setInt(2, expiryMinutes);
+            preparedStatement.setString(3, email);
+            isUpdated = preparedStatement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error while creating password reset token.", e);
+        } finally {
+            closeQuietly(preparedStatement);
+            closeQuietly(connection);
+        }
+
+        return isUpdated;
+    }
+
+    public boolean resetPasswordByToken(String token, String newPassword) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        boolean isUpdated = false;
+
+        String sql = "UPDATE `USER` SET password = ?, reset_token = NULL, reset_expiry = NULL "
+                + "WHERE reset_token = ? AND reset_expiry > NOW() AND is_verified = 1 AND password != '*'";
+
+        try {
+            connection = DBConnection.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, newPassword);
+            preparedStatement.setString(2, token);
+            isUpdated = preparedStatement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error while resetting password.", e);
+        } finally {
+            closeQuietly(preparedStatement);
+            closeQuietly(connection);
+        }
+
+        return isUpdated;
+    }
+
     public boolean registerPendingUser(UserBean user, String token, int expiryMinutes) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         boolean isRegistered = false;
 
-        String sql = "INSERT INTO `PENDING_USER` (name, email, password, token, expiry_time) VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE))";
+        String sql = "INSERT INTO `USER` (name, email, password, role, is_verified, verification_token, verification_expiry) "
+                + "VALUES (?, ?, ?, ?, 0, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE))";
 
         try {
             connection = DBConnection.getConnection();
@@ -242,13 +294,16 @@ public class UserDAO {
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getEmail());
             preparedStatement.setString(3, user.getPassword());
-            preparedStatement.setString(4, token);
-            preparedStatement.setInt(5, expiryMinutes);
+            preparedStatement.setString(4, user.getRole());
+            preparedStatement.setString(5, token);
+            preparedStatement.setInt(6, expiryMinutes);
 
             isRegistered = preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            if (isDuplicateEmailViolation(e)) {
+                return refreshUnverifiedUser(user, token, expiryMinutes);
+            }
+            throw new RuntimeException("Database error while creating unverified user.", e);
         } finally {
             closeQuietly(preparedStatement);
             closeQuietly(connection);
@@ -263,7 +318,8 @@ public class UserDAO {
         ResultSet resultSet = null;
         UserBean user = null;
 
-        String sql = "SELECT id, name, email, password FROM `PENDING_USER` WHERE token = ? AND expiry_time > NOW()";
+        String sql = "SELECT user_id, name, email, password FROM `USER` "
+                + "WHERE verification_token = ? AND verification_expiry > NOW() AND is_verified = 0 AND password != '*'";
 
         try {
             connection = DBConnection.getConnection();
@@ -273,7 +329,7 @@ public class UserDAO {
 
             if (resultSet.next()) {
                 user = new UserBean();
-                user.setUserId(resultSet.getInt("id"));
+                user.setUserId(resultSet.getInt("user_id"));
                 user.setName(resultSet.getString("name"));
                 user.setEmail(resultSet.getString("email"));
                 user.setPassword(resultSet.getString("password"));
@@ -295,7 +351,8 @@ public class UserDAO {
         PreparedStatement preparedStatement = null;
         boolean isDeleted = false;
 
-        String sql = "DELETE FROM `PENDING_USER` WHERE id = ?";
+        String sql = "UPDATE `USER` SET is_verified = 1, verification_token = NULL, verification_expiry = NULL "
+                + "WHERE user_id = ? AND is_verified = 0";
 
         try {
             connection = DBConnection.getConnection();
@@ -334,5 +391,34 @@ public class UserDAO {
 
     private boolean isDuplicateEmailViolation(SQLException e) {
         return e != null && ("23000".equals(e.getSQLState()) || e.getErrorCode() == 1062);
+    }
+
+    private boolean refreshUnverifiedUser(UserBean user, String token, int expiryMinutes) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        boolean isUpdated = false;
+
+        String sql = "UPDATE `USER` SET name = ?, password = ?, role = ?, is_verified = 0, "
+                + "verification_token = ?, verification_expiry = DATE_ADD(NOW(), INTERVAL ? MINUTE) "
+                + "WHERE email = ? AND is_verified = 0 AND password != '*'";
+
+        try {
+            connection = DBConnection.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getPassword());
+            preparedStatement.setString(3, user.getRole());
+            preparedStatement.setString(4, token);
+            preparedStatement.setInt(5, expiryMinutes);
+            preparedStatement.setString(6, user.getEmail());
+            isUpdated = preparedStatement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error while refreshing unverified user.", e);
+        } finally {
+            closeQuietly(preparedStatement);
+            closeQuietly(connection);
+        }
+
+        return isUpdated;
     }
 }

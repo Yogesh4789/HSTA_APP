@@ -14,18 +14,8 @@ DROP TABLE IF EXISTS `KNOWLEDGE_BASE`;
 DROP TABLE IF EXISTS `TICKET`;
 DROP TABLE IF EXISTS `SLA_POLICY`;
 DROP TABLE IF EXISTS `USER`;
-DROP TABLE IF EXISTS `PENDING_USER`;
 
 SET FOREIGN_KEY_CHECKS = 1;
-
-CREATE TABLE `PENDING_USER` (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    token VARCHAR(100) NOT NULL UNIQUE,
-    expiry_time DATETIME NOT NULL
-);
 
 CREATE TABLE `USER` (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -33,6 +23,11 @@ CREATE TABLE `USER` (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role ENUM('USER', 'AGENT', 'ADMIN') NOT NULL,
+    is_verified TINYINT(1) NOT NULL DEFAULT 1,
+    verification_token VARCHAR(100) UNIQUE NULL,
+    verification_expiry DATETIME NULL,
+    reset_token VARCHAR(100) NULL,
+    reset_expiry DATETIME NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -167,5 +162,3 @@ INSERT INTO `KNOWLEDGE_BASE` (title, content, category, created_by) VALUES
 -- select user_id, name, email, role, created_at, password 
 -- from `USER`
 -- order by user_id desc;
-
-

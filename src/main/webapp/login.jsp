@@ -65,6 +65,9 @@ boolean rememberChecked = Boolean.TRUE.equals(request.getAttribute("rememberChec
 
                     <button class="btn btn-primary" type="submit">Login</button>
                 </form>
+                <div class="auth-helper-row">
+                    <a href="<%=request.getContextPath()%>/forgotPassword.jsp" class="auth-link-btn">Forgot Password?</a>
+                </div>
                 <hr style="margin: 22px 0; border: 0; border-top: 1px solid #eaecf0;">
                 <a id="registerToggleBtn" class="btn btn-secondary" href="<%=request.getContextPath()%>/login.jsp#registerSection">New User? Create Account</a>
             </div>

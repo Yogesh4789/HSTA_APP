@@ -262,6 +262,37 @@ th {
     color: var(--muted);
 }
 
+.auth-helper-row {
+    margin-top: 22px;
+    margin-bottom: 2px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.auth-link-btn {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid #cfe7e2;
+    background: #eefbf8;
+    color: #0f766e;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-link-btn:hover {
+    background: #dff5f1;
+    color: #115e59;
+    box-shadow: 0 8px 20px rgba(15, 118, 110, 0.18);
+    transform: translateY(-1px);
+}
+
+.auth-link-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.25);
+}
+
 .actions-inline form {
     display: inline-block;
     margin-right: 6px;

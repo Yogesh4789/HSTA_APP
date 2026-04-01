@@ -38,12 +38,6 @@ public class UserService {
             return false;
         }
 
-        // Check if email already exists in main USER table
-        UserBean existing = userDAO.getUserByEmail(email.trim());
-        if (existing != null) {
-            return false;
-        }
-
         UserBean user = new UserBean();
         user.setName(name.trim());
         user.setEmail(email.trim());
@@ -51,7 +45,7 @@ public class UserService {
         user.setRole("USER");
 
         String token = UUID.randomUUID().toString();
-        // Register in pending table with 10 minutes expiry
+        // Save as unverified user with a 10-minute verification token expiry
         boolean isPendingRegistered = userDAO.registerPendingUser(user, token, 10);
         
         if (isPendingRegistered) {
@@ -66,13 +60,32 @@ public class UserService {
     public boolean activateUser(String token) {
         UserBean pendingUser = userDAO.getPendingUserByToken(token);
         if (pendingUser != null) {
-            boolean registered = userDAO.registerUser(pendingUser);
-            if (registered) {
-                userDAO.deletePendingUser(pendingUser.getUserId());
-                return true;
-            }
+            return userDAO.deletePendingUser(pendingUser.getUserId());
         }
         return false;
+    }
+
+    public boolean requestPasswordReset(String email, String requestUrl) {
+        if (!isValidEmail(email)) {
+            return false;
+        }
+        String normalizedEmail = email.trim();
+        String token = UUID.randomUUID().toString();
+        boolean tokenCreated = userDAO.createPasswordResetToken(normalizedEmail, token, 10);
+        if (!tokenCreated) {
+            return false;
+        }
+        return mailService.sendPasswordResetEmail(normalizedEmail, token, requestUrl);
+    }
+
+    public boolean resetPassword(String token, String newPassword, String confirmPassword) {
+        if (isBlank(token) || isBlank(newPassword) || isBlank(confirmPassword)) {
+            return false;
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            return false;
+        }
+        return userDAO.resetPasswordByToken(token.trim(), newPassword.trim());
     }
 
     public UserBean getUserById(int userId) {
